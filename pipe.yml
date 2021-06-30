@@ -1,0 +1,10 @@
+name: Aligent Microservice Deployment Pipe
+image: aligent/microservice-deploy-pipe:latest
+description: This pipe is used to deploy Aligent microservices
+repository: git@bitbucket.org:aligent/aligent-microservice-deploy-pipe.git 
+maintainer: john.smith@aligent.com.au
+tags:
+    - bitbucket-pipelines
+    - pipes
+    - bash
+  
