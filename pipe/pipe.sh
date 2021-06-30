@@ -2,7 +2,7 @@
 
 set -e
 
-source "$(dirname "$0")/common.sh"
+source "/common.sh"
 
 inject_aws_creds() {
      mkdir -p ~/.aws
