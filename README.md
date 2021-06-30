@@ -14,8 +14,8 @@ Add the following your `bitbucket-pipelines.yml` file:
         script:
           - pipe: docker://aligent/microservice-deploy-pipe:latest
             variables:
-              aws_access_key_id: ${aws_access_key_id}
-              aws_secret_access_key: ${aws_secret_access_key}
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 
 ```
 ## Variables
