@@ -12,6 +12,8 @@ inject_aws_creds() {
 }
 
 install_dependencies() {
+     npm config set user 0
+     npm config set unsafe-perm true
      npm ci
 }
 
