@@ -5,12 +5,11 @@ This pipe is used to deploy standardised Aligent microsevers.
 ## YAML Definition
 
 Add the following your `bitbucket-pipelines.yml` file:
+> Please note: there is currently an issue with Bitbucket's node cache type. This cannot be used in the step until resolved.
 
 ```yaml
     - step:
         name: "deploy service"
-        caches:
-          - node
         script:
           - pipe: docker://aligent/microservice-deploy-pipe:latest
             variables:
