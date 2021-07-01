@@ -22,13 +22,11 @@ install_dependencies() {
           debug "Current path permissions:"
           stat .
           debug "node_modules path permissions"
-          stat ./node_modules
+          stat ./node_modules || true
           debug "Listing dir"
           ls -alth ./
           debug "Listing node_modules dir"
           ls -alth ./node_modules || true
-
-
           
      fi
      npm config set user 0
