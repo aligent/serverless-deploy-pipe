@@ -4,6 +4,8 @@ set -e
 
 source "/common.sh"
 
+DEBUG=${DEBUG:=false}
+
 inject_aws_creds() {
      mkdir -p ~/.aws
      echo "[bitbucket-deployer]" >> ~/.aws/credentials 
@@ -12,6 +14,16 @@ inject_aws_creds() {
 }
 
 install_dependencies() {
+     if [ $DEBUG ]
+     then
+          debug "Current user:"
+          id -u
+          id -un
+          debug "Current path permissions:"
+          stat .
+          debug "node_modules path permissions"
+          stat ./node_modules
+     fi
      npm config set user 0
      npm config set unsafe-perm true
      npm ci
