@@ -1,7 +1,7 @@
-name: Aligent Microservice Deployment Pipe
-image: aligent/microservice-deploy-pipe:latest
-description: This pipe is used to deploy Aligent microservices
-repository: git@bitbucket.org:aligent/aligent-microservice-deploy-pipe.git 
+name: Aligent Serverless Deployment Pipe
+image: aligent/serverless-deploy-pipe:latest
+description: This pipe is used to deploy Aligent Serverless applications 
+repository: git@bitbucket.org:aligent/aligent-serverless-deploy-pipe.git 
 maintainer: john.smith@aligent.com.au
 tags:
     - bitbucket-pipelines
