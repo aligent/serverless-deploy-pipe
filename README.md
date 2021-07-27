@@ -1,6 +1,6 @@
 # Aligent Magento Code Standards Pipe
 
-This pipe is used to deploy standardised Aligent microsevers.
+This pipe is used to deploy Aligent [Serverless](https://www.serverless.com/) applications.
 
 ## YAML Definition
 
