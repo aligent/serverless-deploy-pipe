@@ -35,8 +35,7 @@ install_dependencies() {
 }
 
 deploy() {
-     [[ "$BITBUCKET_BRANCH" == "production" ]] && stage="production" || stage="staging"
-     /serverless/node_modules/serverless/bin/serverless.js deploy --stage $stage --aws-profile bitbucket-deployer --conceal --force
+     /serverless/node_modules/serverless/bin/serverless.js deploy --stage $BITBUCKET_BRANCH --aws-profile bitbucket-deployer --conceal --force
 }
 
 inject_aws_creds
