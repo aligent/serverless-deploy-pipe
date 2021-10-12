@@ -5,6 +5,7 @@ set -e
 source "/common.sh"
 
 DEBUG=${DEBUG:=false}
+DEPLOYMENT_STAGE=${STAGE:=$BITBUCKET_BRANCH}
 
 inject_aws_creds() {
      mkdir -p ~/.aws
@@ -35,7 +36,7 @@ install_dependencies() {
 }
 
 deploy() {
-     /serverless/node_modules/serverless/bin/serverless.js deploy --stage $BITBUCKET_BRANCH --aws-profile bitbucket-deployer --conceal --force
+     /serverless/node_modules/serverless/bin/serverless.js deploy --stage $DEPLOYMENT_STAGE --aws-profile bitbucket-deployer --conceal --force
 }
 
 inject_aws_creds
