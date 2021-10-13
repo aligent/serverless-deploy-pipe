@@ -17,6 +17,7 @@ inject_aws_creds() {
 install_dependencies() {
      if [ $DEBUG ]
      then
+          debug "install_dependencies()"
           debug "Current user:"
           id -u
           id -un
@@ -29,7 +30,7 @@ install_dependencies() {
           debug "Listing node_modules dir"
           ls -alth ./node_modules || true
 
-          debug "Stage = $STAGE, DEPLOYMENT_STAGE = $DEPLOYMENT_STAGE"
+          
      fi
      npm config set user 0
      npm config set unsafe-perm true
@@ -37,6 +38,13 @@ install_dependencies() {
 }
 
 deploy() {
+     if [ $DEBUG ]
+     then
+          debug "deploy()"
+          debug "Stage = $STAGE, DEPLOYMENT_STAGE = $DEPLOYMENT_STAGE"
+          echo "/serverless/node_modules/serverless/bin/serverless.js deploy --stage $DEPLOYMENT_STAGE --aws-profile bitbucket-deployer --conceal --force"
+     fi
+
      /serverless/node_modules/serverless/bin/serverless.js deploy --stage $DEPLOYMENT_STAGE --aws-profile bitbucket-deployer --conceal --force
 }
 
