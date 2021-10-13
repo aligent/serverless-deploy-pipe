@@ -7,6 +7,8 @@ source "/common.sh"
 DEBUG=${DEBUG:=false}
 DEPLOYMENT_STAGE=${STAGE:=$BITBUCKET_BRANCH}
 
+/serverless/node_modules/serverless/bin/serverless.js --version
+
 inject_aws_creds() {
      mkdir -p ~/.aws
      echo "[bitbucket-deployer]" >> ~/.aws/credentials 
@@ -29,9 +31,8 @@ install_dependencies() {
           ls -alth ./
           debug "Listing node_modules dir"
           ls -alth ./node_modules || true
-
-          
      fi
+
      npm config set user 0
      npm config set unsafe-perm true
      npm ci
