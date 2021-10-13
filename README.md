@@ -11,7 +11,7 @@ Add the following your `bitbucket-pipelines.yml` file:
     - step:
         name: "deploy service"
         script:
-          - pipe: docker://aligent/microservice-deploy-pipe:latest
+          - pipe: docker://aligent/serverless-deploy-pipe:latest
             variables:
               AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
               AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
