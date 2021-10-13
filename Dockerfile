@@ -1,4 +1,4 @@
-FROM aligent/serverless
+FROM aligent/serverless:latest
 
 COPY pipe /
 RUN apk add --no-cache wget
