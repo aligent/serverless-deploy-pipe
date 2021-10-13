@@ -28,7 +28,8 @@ install_dependencies() {
           ls -alth ./
           debug "Listing node_modules dir"
           ls -alth ./node_modules || true
-          
+
+          debug "Stage = $STAGE, DEPLOYMENT_STAGE = $DEPLOYMENT_STAGE"
      fi
      npm config set user 0
      npm config set unsafe-perm true
