@@ -1,4 +1,5 @@
-FROM aligent/serverless:latest
+ARG SERVERLESS_VERSION
+FROM aligent/serverless:${SERVERLESS_VERSION}
 
 COPY pipe /
 RUN apk add --no-cache wget
