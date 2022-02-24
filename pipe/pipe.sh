@@ -38,6 +38,25 @@ install_dependencies() {
      npm ci
 }
 
+inject_cfn_role()() {
+     EXISTING_LEGACY_CFN_ROLE=$(yq '.provider.cfnRole' serverless.yml)
+     EXISTING_CFN_ROLE=$(yq '.provider.iam.deploymentRole' serverless.yml)
+     if [[ -n "${EXISTING_LEGACY_CFN_ROLE// /}" ]] && [[ -n "${EXISTING_CFN_ROLE// /}" ]] ; then
+          echo "It looks like serverless.yaml already defines a CFN role."
+          if [ $CFN_ROLE ];
+          then
+               echo "This will be overwritten with ${CFN_ROLE}. Please remove from serverless.yaml"
+          else
+               echo "This can now be injected by serverless-deploy-pipe and removed from serverless.yaml"
+          fi
+     fi
+
+     if [ $CFN_ROLE]
+     then
+          mv serverless.yml /tmp/serverless.yml && yq -y 'del(.provider.cfnRole) | .provider.iam.deploymentRole=env.CFN_ROLE'  /tmp/serverless.yml > ./serverless.yml
+     fi
+}
+
 deploy() {
      if [ $DEBUG ]
      then
@@ -50,5 +69,6 @@ deploy() {
 }
 
 inject_aws_creds
+inject_cfn_role
 install_dependencies
 deploy
