@@ -2,7 +2,7 @@ ARG SERVERLESS_VERSION
 FROM aligent/serverless:${SERVERLESS_VERSION}
 
 COPY pipe /
-RUN apk add --no-cache wget
+RUN apk add --no-cache wget jq
 
 ENV PYTHONUNBUFFERED=1
 RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
