@@ -38,7 +38,7 @@ install_dependencies() {
      npm ci
 }
 
-inject_cfn_role()() {
+inject_cfn_role() {
      EXISTING_LEGACY_CFN_ROLE=$(yq '.provider.cfnRole' serverless.yml)
      EXISTING_CFN_ROLE=$(yq '.provider.iam.deploymentRole' serverless.yml)
      if [[ -n "${EXISTING_LEGACY_CFN_ROLE// /}" ]] && [[ -n "${EXISTING_CFN_ROLE// /}" ]] ; then
