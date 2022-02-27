@@ -41,7 +41,7 @@ install_dependencies() {
 inject_cfn_role() {
      EXISTING_LEGACY_CFN_ROLE=$(yq '.provider.cfnRole' serverless.yml)
      EXISTING_CFN_ROLE=$(yq '.provider.iam.deploymentRole' serverless.yml)
-     if [[ -n "${EXISTING_LEGACY_CFN_ROLE// /}" ]] && [[ -n "${EXISTING_CFN_ROLE// /}" ]] ; then
+     if [[ ! $EXISTING_CFN_ROLE == "null" ]] || [[ ! $EXISTING_LEGACY_CFN_ROLE == "null" ]]; then
           echo "It looks like serverless.yaml already defines a CFN role."
           if [ $CFN_ROLE ];
           then
