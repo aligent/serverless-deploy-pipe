@@ -33,13 +33,12 @@ install_dependencies() {
           ls -alth ./node_modules || true
      fi
 
-     npm cache clean --force
      $DEBUG && debug "Set npm user to root"
      npm config set user 0
      $DEBUG && debug "Set npm unsafe-perm to true"
      npm config set unsafe-perm true
      $DEBUG && debug "Run npm ci"
-     npm i --verbose
+     npm ci --verbose
 }
 
 inject_cfn_role() {
