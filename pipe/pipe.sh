@@ -11,9 +11,9 @@ DEPLOYMENT_STAGE=${STAGE:=$BITBUCKET_BRANCH}
 
 inject_aws_creds() {
      mkdir -p ~/.aws
-     echo "[bitbucket-deployer]" >> ~/.aws/credentials 
-     echo "aws_access_key_id=$AWS_ACCESS_KEY_ID"  >> ~/.aws/credentials 
-     echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"  >> ~/.aws/credentials 
+     echo "[bitbucket-deployer]" >> ~/.aws/credentials
+     echo "aws_access_key_id=$AWS_ACCESS_KEY_ID"  >> ~/.aws/credentials
+     echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"  >> ~/.aws/credentials
 }
 
 install_dependencies() {
@@ -33,8 +33,11 @@ install_dependencies() {
           ls -alth ./node_modules || true
      fi
 
+     $DEBUG && debug "Set npm user to root"
      npm config set user 0
+     $DEBUG && debug "Set npm unsafe-perm to true"
      npm config set unsafe-perm true
+     $DEBUG && debug "Run npm ci"
      npm ci
 }
 
