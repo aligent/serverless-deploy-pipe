@@ -29,8 +29,8 @@ install_dependencies() {
           stat ./node_modules || true
           debug "Listing dir"
           ls -alth ./
-          debug "Listing node_modules dir"
-          ls -alth ./node_modules || true
+          #debug "Listing node_modules dir"
+          #ls -alth ./node_modules || true
      fi
 
      $DEBUG && debug "Set npm user to root"
