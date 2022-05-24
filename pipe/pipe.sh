@@ -29,10 +29,11 @@ install_dependencies() {
           stat ./node_modules || true
           debug "Listing dir"
           ls -alth ./
-          #debug "Listing node_modules dir"
-          #ls -alth ./node_modules || true
+          debug "Listing node_modules dir"
+          ls -alth ./node_modules || true
      fi
 
+     npm cache clean
      $DEBUG && debug "Set npm user to root"
      npm config set user 0
      $DEBUG && debug "Set npm unsafe-perm to true"
