@@ -39,7 +39,7 @@ install_dependencies() {
      $DEBUG && debug "Set npm unsafe-perm to true"
      npm config set unsafe-perm true
      $DEBUG && debug "Run npm ci"
-     npm ci --verbose
+     npm i --verbose
 }
 
 inject_cfn_role() {
