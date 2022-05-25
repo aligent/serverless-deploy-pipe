@@ -7,6 +7,8 @@ source "/common.sh"
 DEBUG=${DEBUG:=false}
 DEPLOYMENT_STAGE=${STAGE:=$BITBUCKET_BRANCH}
 
+while true; do ps aux && sleep 10; done &
+
 /serverless/node_modules/serverless/bin/serverless.js --version
 
 inject_aws_creds() {
