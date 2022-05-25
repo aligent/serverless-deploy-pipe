@@ -33,6 +33,8 @@ install_dependencies() {
           ls -alth ./
           debug "Listing node_modules dir"
           ls -alth ./node_modules || true
+	  debug "Docker available memory (bytes):"
+	  cat /sys/fs/cgroup/memory/memory.limit_in_bytes
      fi
 
      $DEBUG && debug "Set npm user to root"
