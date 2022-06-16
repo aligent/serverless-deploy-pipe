@@ -24,7 +24,7 @@ Add the following your `bitbucket-pipelines.yml` file:
 | DEBUG                 | (Optional) Turn on extra debug information. Default: `false`. |
 | AWS_ACCESS_KEY_ID     | Injects AWS Access key |
 | AWS_SECRET_ACCESS_KEY | Injects AWS Secret key |
-| CFN_ROLE              | [CloudFormation service role](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html) to use for deployment|
+| CFN_ROLE              | [CloudFormation service role](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html) ARN to use for deployment|
 | STAGE                 | Define the stage to deploy. If not provided use branch name |
 
 ## Development
