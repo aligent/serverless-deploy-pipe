@@ -53,7 +53,7 @@ inject_cfn_role() {
 
      if [ $CFN_ROLE ]
      then
-          mv serverless.yml /tmp/serverless.yml && yq -y 'del(.provider.cfnRole) | .provider.iam.deploymentRole=env.CFN_ROLE'  /tmp/serverless.yml > ./serverless.yml
+          mv serverless.yml /tmp/serverless.yml && yq -Y -y 'del(.provider.cfnRole) | .provider.iam.deploymentRole=env.CFN_ROLE'  /tmp/serverless.yml > ./serverless.yml
      fi
 }
 
