@@ -33,10 +33,14 @@ install_dependencies() {
           ls -alth ./node_modules || true
      fi
 
-     unset NPM_CONFIG_USER
-     npm config set user 0
-     npm config set unsafe-perm true
-     npm ci
+     if [ $YARN ]
+     then
+          yarn install --frozen-lockfile
+     else
+          npm config set user 0
+          npm config set unsafe-perm true
+          npm ci
+     fi
 }
 
 inject_cfn_role() {
