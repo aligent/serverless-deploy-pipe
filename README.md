@@ -26,6 +26,7 @@ Add the following your `bitbucket-pipelines.yml` file:
 | AWS_SECRET_ACCESS_KEY | Injects AWS Secret key |
 | CFN_ROLE              | [CloudFormation service role](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html) to use for deployment|
 | STAGE                 | Define the stage to deploy. If not provided use branch name |
+| YARN                  | Use yarn to resolve dependencies |
 
 ## Development
 
