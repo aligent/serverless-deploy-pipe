@@ -52,13 +52,9 @@ class ServerlessDeploy(Pipe):
         f.close()
 
     def inject_cfn_role(self):
-        if self.cfn_role is None or not self.cfn_role:
-            self.log_debug("No CFN_ROLE found, skipping.") 
-            return
-
         self.log_debug("Injecting CFN_ROLE")
 
-        with open(f'{os.getcwd()}/serverless.yml', "r+") as file:
+        with open(f'{os.getcwd()}/serverless.yml', "r") as file:
             try:
                 serverless = yaml.load(file, Loader=yaml.BaseLoader)
 
@@ -68,18 +64,34 @@ class ServerlessDeploy(Pipe):
 
                 # if a role already exists DO NOT override it
                 if "cfnRole" in serverless["provider"] or "deploymentRole" in serverless["provider"]["iam"]:
-                    self.log_debug("It looks like serverless.yaml already defines a CFN role, skipping injection.")
+                    self.log_info("It looks like serverless.yaml already defines a CFN role.")
+
+                    if self.cfn_role is None or not self.cfn_role:
+                        self.log_info("This can now be injected by serverless-deploy-pipe and removed from serverless.yaml")
+                    else: 
+                        self.log_info(f'This will be overwritten with {self.cfn_role}. Please remove from serverless.yaml')
+
+                # If we don't have a role to inject no point writing the file
+                if self.cfn_role is None or not self.cfn_role:
                     return
 
-                # Inject the role
-                serverless["provider"]["iam"]["deploymentRole"] = self.cfn_role
+                # Remove the old role
+                if "cfnRole" in serverless["provider"]:
+                    del serverless["provider"]["cfnRole"]
 
-                # Dump the updated yml back out to the file
-                yaml.dump(serverless, file)
+                # Inject the new role
+                serverless["provider"]["iam"]["deploymentRole"] = self.cfn_role
             except yaml.YAMLError as exc:
                 self.log_debug(exc)
                 raise Exception("Failed to inject CFN_role")
 
+        with open(f'{os.getcwd()}/serverless.yml', "w") as file:
+            try:
+                # Dump the updated yml back out to the file
+                yaml.dump(serverless, stream=file)
+            except yaml.YAMLError as exc:
+                self.log_debug(exc)
+                raise Exception("Failed to inject CFN_role")
 
     def install_dependencies(self):
         if self.yarn:
@@ -120,18 +132,18 @@ class ServerlessDeploy(Pipe):
 
         deployment_stage = self.stage or self.bitbucket_branch
         self.log_debug(f'Deploying {deployment_stage}')
-        deploy = subprocess.run(
-                args=[
-                        "/serverless/node_modules/serverless/bin/serverless.js",
-                        "deploy",
-                        "--stage",
-                        deployment_stage,
-                        "--aws-profile",
-                        "bitbucket-deployer",
-                        "--conceal",
-                        "--force"
-                    ],
-                universal_newlines=True)
+        # deploy = subprocess.run(
+        #         args=[
+        #                 "/serverless/node_modules/serverless/bin/serverless.js",
+        #                 "deploy",
+        #                 "--stage",
+        #                 deployment_stage,
+        #                 "--aws-profile",
+        #                 "bitbucket-deployer",
+        #                 "--conceal",
+        #                 "--force"
+        #             ],
+        #         universal_newlines=True)
 
         if deploy.returncode != 0:
                 raise Exception("Failed to deploy the service.")
