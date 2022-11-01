@@ -15,7 +15,7 @@ schema = {
     'CFN_ROLE': {'type': 'string', 'required': False},
     'STAGE': {'type': 'string', 'required': False},
     'YARN': {'type': 'boolean', 'required': False},
-    'DEBUG': {'type': 'boolean', 'required': False}
+    'DEBUG': {'type': 'boolean', 'required': False, 'nullable': True}
 }
 
 
@@ -42,14 +42,24 @@ class ServerlessDeploy(Pipe):
     def inject_aws_creds(self):
         self.log_debug("Configuring AWS Deployment user.")
 
-        # Create aws cofig directory
-        os.mkdir(os.path.expanduser('~/.aws'))
+        configure = subprocess.run(
+            args=[
+                    "/serverless/node_modules/serverless/bin/serverless.js",
+                    "config",
+                    "credentials",
+                    "--provider",
+                    "aws",
+                    "--profile",
+                    "bitbucket-deployer",
+                    "--key",
+                    self.access_key_id,
+                    "--secret",
+                    self.secret_acces_key
+                ],
+            universal_newlines=True)
 
-        f = open(os.path.expanduser('~/.aws/credentials'), "a")
-        f.write("[bitbucket-deployer]")
-        f.write(f'aws_access_key_id={self.access_key_id}')
-        f.write(f'aws_secret_access_key={self.secret_acces_key}')
-        f.close()
+        if configure.returncode != 0:
+            raise Exception("Failed to configure serverless credentials.")
 
     def inject_cfn_role(self):
         self.log_debug("Injecting CFN_ROLE")
