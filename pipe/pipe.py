@@ -75,23 +75,22 @@ class ServerlessDeploy(Pipe):
                 if self.cfn_role is None or not self.cfn_role:
                     return
 
-                # Remove the old role
-                if "cfnRole" in serverless["provider"]:
-                    del serverless["provider"]["cfnRole"]
-
-                # Inject the new role
-                serverless["provider"]["iam"]["deploymentRole"] = self.cfn_role
             except yaml.YAMLError as exc:
                 self.log_debug(exc)
                 raise Exception("Failed to inject CFN_role")
 
-        with open(f'{os.getcwd()}/serverless.yml', "w") as file:
-            try:
-                # Dump the updated yml back out to the file
-                yaml.dump(serverless, stream=file)
-            except yaml.YAMLError as exc:
-                self.log_debug(exc)
-                raise Exception("Failed to inject CFN_role")
+        update = subprocess.run(
+            args=[
+                    "yq", 
+                    "-Yi", 
+                    "-yi", 
+                    f'del(.provider.cfnRole) | .provider.iam.deploymentRole="{self.cfn_role}"', 
+                    "serverless.yml"
+                ],
+            universal_newlines=True)
+        
+        if update.returncode != 0:
+            raise Exception("Failed to update the deployment role.")
 
     def install_dependencies(self):
         if self.yarn:
