@@ -132,18 +132,18 @@ class ServerlessDeploy(Pipe):
 
         deployment_stage = self.stage or self.bitbucket_branch
         self.log_debug(f'Deploying {deployment_stage}')
-        # deploy = subprocess.run(
-        #         args=[
-        #                 "/serverless/node_modules/serverless/bin/serverless.js",
-        #                 "deploy",
-        #                 "--stage",
-        #                 deployment_stage,
-        #                 "--aws-profile",
-        #                 "bitbucket-deployer",
-        #                 "--conceal",
-        #                 "--force"
-        #             ],
-        #         universal_newlines=True)
+        deploy = subprocess.run(
+                args=[
+                        "/serverless/node_modules/serverless/bin/serverless.js",
+                        "deploy",
+                        "--stage",
+                        deployment_stage,
+                        "--aws-profile",
+                        "bitbucket-deployer",
+                        "--conceal",
+                        "--force"
+                    ],
+                universal_newlines=True)
 
         if deploy.returncode != 0:
                 raise Exception("Failed to deploy the service.")
