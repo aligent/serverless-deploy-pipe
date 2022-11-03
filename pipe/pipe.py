@@ -7,6 +7,10 @@ import subprocess
 from sys import stdout
 from bitbucket_pipes_toolkit import Pipe, get_logger
 import yaml
+from pybadges import badge
+from datetime import datetime
+import pytz
+import requests
 
 logger = get_logger()
 schema = {
@@ -15,9 +19,12 @@ schema = {
     'CFN_ROLE': {'type': 'string', 'required': False},
     'STAGE': {'type': 'string', 'required': False},
     'YARN': {'type': 'boolean', 'required': False},
-    'DEBUG': {'type': 'boolean', 'required': False, 'nullable': True}
+    'DEBUG': {'type': 'boolean', 'required': False, 'nullable': True},
+    'TIMEZONE': {'type': 'string', 'required': False, 'default': 'Australia/Adelaide'},
+    'UPLOAD_BADGE': {'type': 'boolean', 'required': False, 'default': False},
+    'APP_USERNAME': {'type': 'string', 'required': False},
+    'APP_PASSWORD': {'type': 'string', 'required': False}
 }
-
 
 class ServerlessDeploy(Pipe):
 
@@ -30,6 +37,10 @@ class ServerlessDeploy(Pipe):
         self.cfn_role = self.get_variable('CFN_ROLE')
         self.stage = self.get_variable('STAGE')
         self.yarn = self.get_variable('YARN')
+        self.timezone = self.get_variable('TIMEZONE')
+        self.upload_badge = self.get_variable('UPLOAD_BADGE')
+        self.app_username = self.get_variable('APP_USERNAME')
+        self.app_password = self.get_variable('APP_PASSWORD')
 
         # Bitbucket Configuration
         self.bitbucket_workspace = os.getenv('BITBUCKET_WORKSPACE')
@@ -136,37 +147,67 @@ class ServerlessDeploy(Pipe):
             if install.returncode != 0:
                 raise Exception("Failed to install dependencies")
 
+    def upload_deployment_badge(self, wasSuccessful):
+        if not self.upload_badge:
+            self.log_debug("Skipping badge upload.")
+            return
+
+        if not self.app_password or not self.app_username:
+            self.log_error("APP_USERNAME or APP_PASSWORD not set, we cannot upload without them.")
+            self.fail(message="Failed to upload deployment badge.")
+            return
+
+        time = datetime.now(pytz.timezone(self.timezone))
+        file_name = f'{self.bitbucket_branch}_status.svg'
+
+        if wasSuccessful:
+            deployment_badge = badge(left_text='deployment', right_text=time.strftime("%d %b, %Y, %H:%M"), right_color='green')
+        else: 
+            deployment_badge = badge(left_text='deployment', right_text=time.strftime("%d %b, %Y, %H:%M"), right_color='red')
+        
+        request = requests.post(f'https://api.bitbucket.org/2.0/repositories/{self.bitbucket_workspace}/{self.bitbucket_repo_slug}/downloads', files=[('files', (file_name, deployment_badge, 'image/svg+xml'))], auth=(self.app_username, self.app_password))
+
+        if request.status_code != 201:
+            self.log_error(f'Request to upload deployment badge failed with HTTP: {request.status_code}')
+            self.fail(message="Failed to upload deployment badge.")
+            return
+
+        self.log_debug("Badge uploaded.")
+
     def deploy(self):
         self.log_debug("Deploying Service.")
 
         deployment_stage = self.stage or self.bitbucket_branch
         self.log_debug(f'Deploying {deployment_stage}')
-        deploy = subprocess.run(
-                args=[
-                        "/serverless/node_modules/serverless/bin/serverless.js",
-                        "deploy",
-                        "--stage",
-                        deployment_stage,
-                        "--aws-profile",
-                        "bitbucket-deployer",
-                        "--conceal",
-                        "--force"
-                    ],
-                universal_newlines=True)
+        # deploy = subprocess.run(
+        #         args=[
+        #                 "/serverless/node_modules/serverless/bin/serverless.js",
+        #                 "deploy",
+        #                 "--stage",
+        #                 deployment_stage,
+        #                 "--aws-profile",
+        #                 "bitbucket-deployer",
+        #                 "--conceal",
+        #                 "--force"
+        #             ],
+        #         universal_newlines=True)
 
-        if deploy.returncode != 0:
-                raise Exception("Failed to deploy the service.")
+        # if deploy.returncode != 0:
+        #         raise Exception("Failed to deploy the service.")
 
     def run(self):
         super().run()
         try: 
+            # self.install_dependencies()
             self.inject_aws_creds()
             self.inject_cfn_role()
-            self.install_dependencies()
             self.deploy()
         except:
             self.fail(message="Serverless deploy failed.")
+            self.generate_deployment_badge(False)
+            return
 
+        self.upload_deployment_badge(True)
         self.success(message=f"Serverless Deploy Succeeded Passed")
 
 if __name__ == '__main__':
