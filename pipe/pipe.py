@@ -198,7 +198,7 @@ class ServerlessDeploy(Pipe):
     def run(self):
         super().run()
         try: 
-            # self.install_dependencies()
+            self.install_dependencies()
             self.inject_aws_creds()
             self.inject_cfn_role()
             self.deploy()
