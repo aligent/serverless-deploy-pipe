@@ -102,9 +102,9 @@ class ServerlessDeploy(Pipe):
 
         update = subprocess.run(
             args=[
-                    "yq", 
-                    "-Yi", 
-                    "-yi", 
+                    "yq",
+                    "-Y",
+                    "-i",
                     f'del(.provider.cfnRole) | .provider.iam.deploymentRole="{self.cfn_role}"', 
                     "serverless.yml"
                 ],
