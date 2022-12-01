@@ -203,8 +203,8 @@ class ServerlessDeploy(Pipe):
             self.inject_cfn_role()
             self.deploy()
         except:
-            self.fail(message="Serverless deploy failed.")
             self.generate_deployment_badge(False)
+            self.fail(message="Serverless deploy failed.")
             return
 
         self.upload_deployment_badge(True)
