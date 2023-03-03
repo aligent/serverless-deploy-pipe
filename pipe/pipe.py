@@ -195,6 +195,19 @@ class ServerlessDeploy(Pipe):
         if deploy.returncode != 0:
                 raise Exception("Failed to deploy the service.")
 
+    def doctor(self):
+        self.log_debug("Running serverless doctor")
+
+        doctor = subprocess.run(
+                args=[
+                        "/serverless/node_modules/serverless/bin/serverless.js",
+                        "doctor"
+                    ],
+                universal_newlines=True)
+
+        if doctor.returncode != 0:
+                raise Exception("Failed to run serverless doctor.")
+
     def run(self):
         super().run()
         try: 
@@ -202,6 +215,7 @@ class ServerlessDeploy(Pipe):
             self.inject_aws_creds()
             self.inject_cfn_role()
             self.deploy()
+            self.doctor()
         except:
             self.fail(message="Serverless deploy failed.")
             self.generate_deployment_badge(False)
