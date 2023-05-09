@@ -217,8 +217,8 @@ class ServerlessDeploy(Pipe):
             self.deploy()
             self.doctor()
         except:
-            self.fail(message="Serverless deploy failed.")
             self.generate_deployment_badge(False)
+            self.fail(message="Serverless deploy failed.")
             return
 
         self.upload_deployment_badge(True)
