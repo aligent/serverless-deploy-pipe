@@ -1,0 +1,6 @@
+junitparser
+git+https://github.com/aligent/bitbucket-manager
+bitbucket-pipes-toolkit==3.2.1
+pyyaml
+pybadges
+pytz
