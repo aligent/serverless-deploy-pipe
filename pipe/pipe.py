@@ -11,6 +11,7 @@ from pybadges import badge
 from datetime import datetime
 import pytz
 import requests
+from semver.version import Version
 
 logger = get_logger()
 schema = {
@@ -49,6 +50,14 @@ class ServerlessDeploy(Pipe):
         self.bitbucket_step_uuid = os.getenv('BITBUCKET_STEP_UUID')
         self.bitbucket_commit = os.getenv('BITBUCKET_COMMIT')
         self.bitbucket_branch = os.getenv('BITBUCKET_BRANCH')
+
+    def determine_npm_version(self):
+        version = subprocess.run(args=["npm", "-v"], universal_newlines=True, capture_output=True)
+
+        if version.returncode != 0:
+            raise Exception("Cannot determine version of npm being used.")
+
+        return Version.parse(version.stdout)
 
     def inject_aws_creds(self):
         self.log_debug("Configuring AWS Deployment user.")
@@ -126,19 +135,24 @@ class ServerlessDeploy(Pipe):
         else:
             self.log_debug("Installing dependencies with npm.")
 
-            configure = subprocess.run(
-                args=["npm", "config", "set", "user", "0"],
-                universal_newlines=True)
+            # Set node version 
+            npm_version = self.determine_npm_version()
 
-            if configure.returncode != 0:
-                raise Exception("Failed to configure npm user id")
+            # Only execute config set commands if using an npm version < 9.0.0
+            if npm_version < Version.parse("9.0.0"):
+                configure = subprocess.run(
+                    args=["npm", "config", "set", "user", "0"],
+                    universal_newlines=True)
 
-            configure = subprocess.run(
-                args=["npm", "config", "set", "unsafe-perm", "true"],
-                universal_newlines=True)
+                if configure.returncode != 0:
+                    raise Exception("Failed to configure npm user id")
 
-            if configure.returncode != 0:
-                raise Exception("Failed to configure npm permissions")
+                configure = subprocess.run(
+                    args=["npm", "config", "set", "unsafe-perm", "true"],
+                    universal_newlines=True)
+
+                if configure.returncode != 0:
+                    raise Exception("Failed to configure npm permissions")
 
             install = subprocess.run(
                 args=["npm", "ci"],
@@ -217,8 +231,8 @@ class ServerlessDeploy(Pipe):
             self.deploy()
             self.doctor()
         except:
-            self.generate_deployment_badge(False)
             self.fail(message="Serverless deploy failed.")
+            self.upload_deployment_badge(False)
             return
 
         self.upload_deployment_badge(True)
