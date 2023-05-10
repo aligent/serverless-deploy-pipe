@@ -139,7 +139,7 @@ class ServerlessDeploy(Pipe):
             npm_version = self.determine_npm_version()
 
             # Only execute config set commands if using an npm version < 9.0.0
-            if self.npm_version < Version.parse("9.0.0"):
+            if npm_version < Version.parse("9.0.0"):
                 configure = subprocess.run(
                     args=["npm", "config", "set", "user", "0"],
                     universal_newlines=True)
@@ -232,7 +232,7 @@ class ServerlessDeploy(Pipe):
             self.doctor()
         except:
             self.fail(message="Serverless deploy failed.")
-            self.generate_deployment_badge(False)
+            self.upload_deployment_badge(False)
             return
 
         self.upload_deployment_badge(True)
