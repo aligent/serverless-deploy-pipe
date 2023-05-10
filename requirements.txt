@@ -4,3 +4,4 @@ bitbucket-pipes-toolkit==3.2.1
 pyyaml
 pybadges
 pytz
+semver
