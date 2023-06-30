@@ -64,26 +64,26 @@ class ServerlessDeploy(Pipe):
         injected_ssh_config_dir = "/opt/atlassian/pipelines/agent/ssh"
         identity_file = f"{injected_ssh_config_dir}/id_rsa_tmp"
         known_servers_file = f"{injected_ssh_config_dir}/known_hosts"
+        os.mkdir(ssh_dir)
 
-        if not os.path.exists(identity_file):
+        if os.path.exists(identity_file):
+            shutil.copy(identity_file, f"{ssh_dir}pipelines_id")
+
+            with open(f"{ssh_dir}config", 'a') as config_file:
+                config_file.write("IdentityFile ~/.ssh/pipelines_id")
+        else:
             self.log_info(message="No default SSH key configured in Pipelines.\n These are required to install internal node packages. \n These should be generated in bitbucket settings at Pipelines > SSH Keys.")
 
-        if not os.path.exists(known_servers_file):
+        if os.path.exists(known_servers_file):
+            # Read contents of pipe-injected known hosts and pipe into 
+            # runtime ssh config
+            with open(known_servers_file) as pipe_known_host_file:
+                with open(f"{ssh_dir}known_hosts", 'a') as known_host_file:
+                    for line in pipe_known_host_file:
+                        known_host_file.write(line)
+        else: 
             self.log_info(message="No SSH known_hosts configured in Pipelines.")
-
-        os.mkdir(ssh_dir)
-        shutil.copy(identity_file, f"{ssh_dir}pipelines_id")
-
-        # Read contents of pipe-injected known hosts and pipe into 
-        # runtime ssh config
-        with open(known_servers_file) as pipe_known_host_file:
-            with open(f"{ssh_dir}known_hosts", 'a') as known_host_file:
-                for line in pipe_known_host_file:
-                    known_host_file.write(line)
-
-        with open(f"{ssh_dir}config", 'a') as config_file:
-            config_file.write("IdentityFile ~/.ssh/pipelines_id")
-
+       
         subprocess.run(["chmod", "-R", "go-rwx", ssh_dir], check=True)
 
     def inject_aws_creds(self):
