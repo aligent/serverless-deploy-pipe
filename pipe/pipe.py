@@ -67,8 +67,10 @@ class ServerlessDeploy(Pipe):
         os.mkdir(ssh_dir)
 
         if os.path.exists(identity_file):
+            self.log_info('SSH identity file found, copying...')
             shutil.copy(identity_file, f"{ssh_dir}pipelines_id")
 
+            self.log_info('Adding identity file config to config file')
             with open(f"{ssh_dir}config", 'a') as config_file:
                 config_file.write("IdentityFile ~/.ssh/pipelines_id")
         else:
@@ -77,6 +79,7 @@ class ServerlessDeploy(Pipe):
         if os.path.exists(known_servers_file):
             # Read contents of pipe-injected known hosts and pipe into 
             # runtime ssh config
+            self.log_info('Piping known hosts into runtime ssh config')
             with open(known_servers_file) as pipe_known_host_file:
                 with open(f"{ssh_dir}known_hosts", 'a') as known_host_file:
                     for line in pipe_known_host_file:
