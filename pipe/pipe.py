@@ -12,6 +12,7 @@ from datetime import datetime
 import pytz
 import requests
 from semver.version import Version
+import shutil
 
 logger = get_logger()
 schema = {
