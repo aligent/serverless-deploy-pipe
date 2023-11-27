@@ -226,20 +226,23 @@ class ServerlessDeploy(Pipe):
         self.log_debug(f'Running serverless action: {action}')
         stage = self.stage or self.bitbucket_branch
         self.log_debug(f'Running on stage: {stage}')
-        deploy = subprocess.run(
-                args=[
-                        "/serverless/node_modules/serverless/bin/serverless.js",
-                        action,
-                        "--stage",
-                        stage,
-                        "--aws-profile",
-                        "bitbucket-deployer",
-                        "--conceal",
-                        "--force"
-                    ],
-                universal_newlines=True)
+        command_args = [
+          "/serverless/node_modules/serverless/bin/serverless.js",
+          action,
+          "--stage",
+          stage,
+          "--aws-profile",
+          "bitbucket-deployer",
+        ]
 
-        if deploy.returncode != 0:
+        if action == 'deploy':
+          command_args.append("--conceal")
+          command_args.append("--force")
+
+        self.log_debug(f'Running with args: {command_args}')
+        command = subprocess.run(args=command_args, universal_newlines=True)
+
+        if command.returncode != 0:
                 raise Exception(f'Failed run {action} for service.')
 
     def doctor(self):
