@@ -26,7 +26,7 @@ schema = {
     'UPLOAD_BADGE': {'type': 'boolean', 'required': False, 'default': False},
     'APP_USERNAME': {'type': 'string', 'required': False},
     'APP_PASSWORD': {'type': 'string', 'required': False},
-    'ACTION': {'type': 'string', 'required': False}
+    'CMD': {'type': 'string', 'required': False}
 }
 
 class ServerlessDeploy(Pipe):
@@ -44,7 +44,7 @@ class ServerlessDeploy(Pipe):
         self.upload_badge = self.get_variable('UPLOAD_BADGE')
         self.app_username = self.get_variable('APP_USERNAME')
         self.app_password = self.get_variable('APP_PASSWORD')
-        self.action = self.get_variable('ACTION')
+        self.cmd = self.get_variable('CMD')
 
         # Bitbucket Configuration
         self.bitbucket_workspace = os.getenv('BITBUCKET_WORKSPACE')
@@ -222,20 +222,20 @@ class ServerlessDeploy(Pipe):
         self.log_debug("Badge uploaded.")
 
     def run_serverless(self):
-        action = self.action or 'deploy'
-        self.log_debug(f'Running serverless action: {action}')
+        cmd = self.cmd or 'deploy'
+        self.log_debug(f'Running serverless cmd: {cmd}')
         stage = self.stage or self.bitbucket_branch
         self.log_debug(f'Running on stage: {stage}')
         command_args = [
           "/serverless/node_modules/serverless/bin/serverless.js",
-          action,
+          cmd,
           "--stage",
           stage,
           "--aws-profile",
           "bitbucket-deployer",
         ]
 
-        if action == 'deploy':
+        if cmd == 'deploy':
           command_args.append("--conceal")
           command_args.append("--force")
 
@@ -243,7 +243,7 @@ class ServerlessDeploy(Pipe):
         command = subprocess.run(args=command_args, universal_newlines=True)
 
         if command.returncode != 0:
-                raise Exception(f'Failed run {action} for service.')
+                raise Exception(f'Failed run {cmd} for service.')
 
     def doctor(self):
         self.log_debug("Running serverless doctor")
