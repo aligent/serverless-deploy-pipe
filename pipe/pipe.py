@@ -25,7 +25,8 @@ schema = {
     'TIMEZONE': {'type': 'string', 'required': False, 'default': 'Australia/Adelaide'},
     'UPLOAD_BADGE': {'type': 'boolean', 'required': False, 'default': False},
     'APP_USERNAME': {'type': 'string', 'required': False},
-    'APP_PASSWORD': {'type': 'string', 'required': False}
+    'APP_PASSWORD': {'type': 'string', 'required': False},
+    'ACTION': {'type': 'string', 'required': False}
 }
 
 class ServerlessDeploy(Pipe):
@@ -43,6 +44,7 @@ class ServerlessDeploy(Pipe):
         self.upload_badge = self.get_variable('UPLOAD_BADGE')
         self.app_username = self.get_variable('APP_USERNAME')
         self.app_password = self.get_variable('APP_PASSWORD')
+        self.action = self.get_variable('ACTION')
 
         # Bitbucket Configuration
         self.bitbucket_workspace = os.getenv('BITBUCKET_WORKSPACE')
@@ -219,17 +221,17 @@ class ServerlessDeploy(Pipe):
 
         self.log_debug("Badge uploaded.")
 
-    def deploy(self):
-        self.log_debug("Deploying Service.")
-
-        deployment_stage = self.stage or self.bitbucket_branch
-        self.log_debug(f'Deploying {deployment_stage}')
+    def run_serverless(self):
+        action = self.action or 'deploy'
+        self.log_debug(f'Running serverless action: {action}')
+        stage = self.stage or self.bitbucket_branch
+        self.log_debug(f'Running on stage: {stage}')
         deploy = subprocess.run(
                 args=[
                         "/serverless/node_modules/serverless/bin/serverless.js",
-                        "deploy",
+                        action,
                         "--stage",
-                        deployment_stage,
+                        stage,
                         "--aws-profile",
                         "bitbucket-deployer",
                         "--conceal",
@@ -238,7 +240,7 @@ class ServerlessDeploy(Pipe):
                 universal_newlines=True)
 
         if deploy.returncode != 0:
-                raise Exception("Failed to deploy the service.")
+                raise Exception(f'Failed run {action} for service.')
 
     def doctor(self):
         self.log_debug("Running serverless doctor")
@@ -260,7 +262,7 @@ class ServerlessDeploy(Pipe):
             self.install_dependencies()
             self.inject_aws_creds()
             self.inject_cfn_role()
-            self.deploy()
+            self.run_serverless()
             self.doctor()
         except:
             self.fail(message="Serverless deploy failed.")
