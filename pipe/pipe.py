@@ -25,7 +25,8 @@ schema = {
     'TIMEZONE': {'type': 'string', 'required': False, 'default': 'Australia/Adelaide'},
     'UPLOAD_BADGE': {'type': 'boolean', 'required': False, 'default': False},
     'APP_USERNAME': {'type': 'string', 'required': False},
-    'APP_PASSWORD': {'type': 'string', 'required': False}
+    'APP_PASSWORD': {'type': 'string', 'required': False},
+    'CMD': {'type': 'string', 'required': False}
 }
 
 class ServerlessDeploy(Pipe):
@@ -43,6 +44,7 @@ class ServerlessDeploy(Pipe):
         self.upload_badge = self.get_variable('UPLOAD_BADGE')
         self.app_username = self.get_variable('APP_USERNAME')
         self.app_password = self.get_variable('APP_PASSWORD')
+        self.cmd = self.get_variable('CMD')
 
         # Bitbucket Configuration
         self.bitbucket_workspace = os.getenv('BITBUCKET_WORKSPACE')
@@ -219,26 +221,29 @@ class ServerlessDeploy(Pipe):
 
         self.log_debug("Badge uploaded.")
 
-    def deploy(self):
-        self.log_debug("Deploying Service.")
+    def run_serverless(self):
+        cmd = self.cmd or 'deploy'
+        self.log_debug(f'Running serverless cmd: {cmd}')
+        stage = self.stage or self.bitbucket_branch
+        self.log_debug(f'Running on stage: {stage}')
+        command_args = [
+          "/serverless/node_modules/serverless/bin/serverless.js",
+          cmd,
+          "--stage",
+          stage,
+          "--aws-profile",
+          "bitbucket-deployer",
+        ]
 
-        deployment_stage = self.stage or self.bitbucket_branch
-        self.log_debug(f'Deploying {deployment_stage}')
-        deploy = subprocess.run(
-                args=[
-                        "/serverless/node_modules/serverless/bin/serverless.js",
-                        "deploy",
-                        "--stage",
-                        deployment_stage,
-                        "--aws-profile",
-                        "bitbucket-deployer",
-                        "--conceal",
-                        "--force"
-                    ],
-                universal_newlines=True)
+        if cmd == 'deploy':
+          command_args.append("--conceal")
+          command_args.append("--force")
 
-        if deploy.returncode != 0:
-                raise Exception("Failed to deploy the service.")
+        self.log_debug(f'Running with args: {command_args}')
+        command = subprocess.run(args=command_args, universal_newlines=True)
+
+        if command.returncode != 0:
+                raise Exception(f'Failed run {cmd} for service.')
 
     def doctor(self):
         self.log_debug("Running serverless doctor")
@@ -260,7 +265,7 @@ class ServerlessDeploy(Pipe):
             self.install_dependencies()
             self.inject_aws_creds()
             self.inject_cfn_role()
-            self.deploy()
+            self.run_serverless()
             self.doctor()
         except:
             self.fail(message="Serverless deploy failed.")

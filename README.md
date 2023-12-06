@@ -31,6 +31,7 @@ Add the following your `bitbucket-pipelines.yml` file:
 | TIMEZONE              | (Optional) Which timezone the time in the badge should use (Default: 'Australia/Adelaide')                                                                |
 | APP_USERNAME          | (Optional) The user to upload the badge as. Required if UPLOAD_BADGE is set to true.                                                                      |
 | APP_PASSWORD          | (Optional) The app password of the user uploading the badge. Required if UPLOAD_BADGE is set to true.                                                     |
+| CMD                   | (Optional) Custom serverless command. Defaults to deploy                                                                                                  |
 
 See here: https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/ for how to generate an app password.
 
