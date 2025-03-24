@@ -119,7 +119,7 @@ class ServerlessDeploy(Pipe):
 
         with open(f'{os.getcwd()}/serverless.yml', "r") as file:
             try:
-                serverless = yaml.load(file, Loader=yaml.BaseLoader)
+                serverless = yaml.safe_load(file)
 
                 # Ensure iam exists in the provider block
                 if "iam" not in serverless["provider"]:
