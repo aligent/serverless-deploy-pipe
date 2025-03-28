@@ -114,9 +114,35 @@ class ServerlessDeploy(Pipe):
         if configure.returncode != 0:
             raise Exception("Failed to configure serverless credentials.")
 
+    def sub_constructor(loader, node):
+        """Custom constructor for !Sub in YAML with variable substitution."""
+        
+        # If the node is a string, perform substitution
+        if isinstance(node, yaml.ScalarNode):
+            value = loader.construct_scalar(node)
+            return substitute_variables(value, {})
+
+        # If the node is a mapping, use it to replace values
+        elif isinstance(node, yaml.MappingNode):
+            data = loader.construct_mapping(node)
+            template = next(iter(data))  # First key is the template string
+            variables = data[template]   # Value is the dictionary of variables
+            return substitute_variables(template, variables)
+
+        raise yaml.constructor.ConstructorError(f"Unexpected node type for !Sub: {type(node)}")
+
+    def substitute_variables(template, variables):
+        """Replaces ${Var} with values from the provided dictionary."""
+        
+        def replace_match(match):
+            var_name = match.group(1)
+            return variables.get(var_name, f"${{{var_name}}}")  # Keep ${Var} if not found
+
+        return re.sub(r"\${([A-Za-z0-9_]+)}", replace_match, template)
+
     def inject_cfn_role(self):
         self.log_debug("Injecting CFN_ROLE")
-
+        yaml.SafeLoader.add_constructor('!Sub', sub_constructor)
         with open(f'{os.getcwd()}/serverless.yml', "r") as file:
             try:
                 serverless = yaml.safe_load(file)
